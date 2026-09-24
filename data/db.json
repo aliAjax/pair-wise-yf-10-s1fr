@@ -46,5 +46,20 @@
       "createdAt": "2026-06-16T00:00:00.000Z",
       "resolvedAt": null
     }
-  ]
+  ],
+  "paperTypes": [
+    {
+      "paperType": "半透明纸带",
+      "tensionLimitN": 24
+    },
+    {
+      "paperType": "加厚牛皮纸带",
+      "tensionLimitN": 38
+    },
+    {
+      "paperType": "棉线加固纸带",
+      "tensionLimitN": 45
+    }
+  ],
+  "splices": []
 }

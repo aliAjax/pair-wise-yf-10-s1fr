@@ -1,0 +1,14 @@
+{
+  "name": "organ-strip-punch-api",
+  "version": "1.0.0",
+  "description": "手摇风琴纸带打孔 API（含纸带断裂接片放行）",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
