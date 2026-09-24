@@ -1,9 +1,11 @@
 const http = require("http");
 const { readFile, writeFile, mkdir } = require("fs/promises");
 const path = require("path");
+const { createSpliceStore } = require("./lib/spliceStore");
+const { createSpliceRouter, spliceRoutes } = require("./lib/spliceRoutes");
 
 const PORT = Number(process.env.PORT || 3019);
-const DB_FILE = path.join(__dirname, "data", "db.json");
+const DB_FILE = process.env.DB_FILE || path.join(__dirname, "data", "db.json");
 
 const initialData = {
   tunes: [
@@ -57,6 +59,7 @@ const initialData = {
 };
 
 const routes = [
+  ...spliceRoutes,
   "GET /health",
   "GET /tunes",
   "POST /tunes",
@@ -87,6 +90,10 @@ async function readDb() {
 async function writeDb(data) {
   await writeFile(DB_FILE, JSON.stringify(data, null, 2));
 }
+
+// 接片放行：独立存档（data/splices.json），主库存档只通过 readDb 只读引用。
+const spliceStore = createSpliceStore(process.env.SPLICE_DB_FILE ? { archiveFile: process.env.SPLICE_DB_FILE } : {});
+const spliceRouter = createSpliceRouter({ store: spliceStore, readDb });
 
 function send(res, status, body) {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
@@ -154,6 +161,10 @@ function buildProgress(db, tuneId) {
 async function handle(req, res) {
   const { pathname, searchParams } = parseUrl(req);
   const db = await readDb();
+
+  // 接片放行入口与主接口分开维护：未命中再走原有路由。
+  const spliceResponse = await spliceRouter.handle(req, res);
+  if (spliceResponse !== null || res.writableEnded) return;
 
   if (req.method === "GET" && pathname === "/health") {
     return send(res, 200, { ok: true, service: "organ-strip-punch-api", routes });
